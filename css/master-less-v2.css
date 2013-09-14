@@ -1,0 +1,13 @@
+/*------------------------------------------------------------------
+[Master LESS]
+Project:    Kevin Montgomery HTML
+Version:    v2
+
+// Master Stylesheet idea from Smashing Magazine
+
+-------------------------------------------------------------------*/
+
+/* LESS CSS 1.3.0 */
+@import "colors";
+@import "typography";
+@import "layout";
