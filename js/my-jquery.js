@@ -62,15 +62,13 @@ var cmyk = new function() {
 		// C = ( C * (1 -- K ) K ) 
 		// M = ( M * (1 -- K ) K ) 
 		// Y = ( Y * (1 -- K ) K )
+		// M = Min(100, K * (74% + (2 ^ (K / 0.2)) / 100))
+		// Y = Min(100, K * (74% + (2 ^ (K / 0.2)) / 100))
+		cmyk.grey_balance = Math.min(100,Math.round(cmyk.black_input * (0.74 + Math.pow(2, cmyk.black_input / 0.20) / 100) * 100)) / 100;
 
-		// M = K * (76% + ((K - 0.25) * 0.24))
-		// Y = K * (76% + ((K - 0.25) * 0.24))
-		// (cmyk.cyan_input * (1 - cmyk.black_input)) + cmyk.black_input
-		cmyk.grey_balance = Math.round((cmyk.black_input * (0.75 + ((cmyk.black_input - 0.25) * 0.25))) * 100) / 100;
-
-		cmyk.cyan_output.value = ((cmyk.cyan_input * (1 - cmyk.black_input)) + cmyk.black_input) * 100;
-		cmyk.magenta_output.value = ((cmyk.magenta_input * (1 - cmyk.grey_balance)) + cmyk.grey_balance) * 100;
-		cmyk.yellow_output.value = ((cmyk.yellow_input * (1 - cmyk.grey_balance)) + cmyk.grey_balance) * 100;
+		cmyk.cyan_output.value = Math.round(((cmyk.cyan_input * (1 - cmyk.black_input)) + cmyk.black_input) * 100);
+		cmyk.magenta_output.value = Math.round(((cmyk.magenta_input * (1 - cmyk.grey_balance)) + cmyk.grey_balance) * 100);
+		cmyk.yellow_output.value = Math.round(((cmyk.yellow_input * (1 - cmyk.grey_balance)) + cmyk.grey_balance) * 100);
 
 		/* [Representation of raw inputs] */
 		cmyk.red_input.value = Math.round(255 * (1 - (cmyk.cyan_output.value / 100)));
