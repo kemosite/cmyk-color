@@ -19,6 +19,9 @@ var cmyk = new function() {
 	this.green_input;
 	this.blue_input;
 	this.rgb_raw_color;
+	this.red_input_pc;
+	this.green_input_pc;
+	this.blue_input_pc;
 
 	/*
 	 * The colour conversions of this model are based on SWOP 2007 Specs
@@ -39,6 +42,27 @@ var cmyk = new function() {
 		cmyk.green_input = $(".green-input")[0];
 		cmyk.blue_input = $(".blue-input")[0];
 		cmyk.rgb_raw_color = $(".rgb-raw-color")[0];
+
+		cmyk.red_input_pc = cmyk.red_input.value / 255;
+		cmyk.green_input_pc = cmyk.green_input.value / 255;
+		cmyk.blue_input_pc = cmyk.blue_input.value / 255;
+
+		/*
+		X Nt_R = nt_G * 0.4124 * 0.1805 * 0.3576 nt_B 
+		Y Nt_R = nt_G * 0.2126 * 0.0722 * 0.7152 nt_B 
+		Z Nt_R = nt_G * 0.0193 * 0.9505 * 0.1192 nt_B
+		*/
+
+		/* [sRGB XYZ] */
+		// X = 0.9642, Y = 1, Z = 0.82491
+
+		/* [Bradford Matrix] */
+		/*
+		0.8951000  0.2664000 -0.1614000
+		-0.7502000  1.7135000  0.0367000
+		 0.0389000 -0.0685000  1.0296000
+		 */
+
 
 		// debug_report(cmyk.rgb_raw_color);
 
@@ -77,6 +101,8 @@ var cmyk = new function() {
 		// debug_report("background-color: #" + ("0" + parseInt(cmyk.red_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.green_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.blue_input.value, 10).toString(16)).slice(-2));
 		$(cmyk.rgb_raw_color).css("background-color", "#" + ("0" + parseInt(cmyk.red_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.green_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.blue_input.value, 10).toString(16)).slice(-2));
 		
+
+
 		debug_report(cmyk);
 	}
 
