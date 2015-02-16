@@ -1,23 +1,31 @@
 /* [CMYK Model] */
-var cmyk = new function() {
+var color_obj = new function() {
 
 	/* [CMYK Inputs]*/
-	this.cyan_input;
-	this.magenta_input;
-	this.yellow_input;
-	this.black_input;
+	this.cmyk_cyan_input;
+	this.cmyk_magenta_input;
+	this.cmyk_yellow_input;
+	this.cmyk_black_input;
 
+	/* [Lab Inputs] */
+	this.lab_l_input;
+	this.lab_a_input;
+	this.lab_b_input;
+
+	/* [Grey Balance] */
 	this.grey_balance;
 
-	/* [CMY Outputs]*/
-	this.cyan_output;
-	this.magenta_output;
-	this.yellow_output;
+	/* [CMY Inputs]*/
+	this.cmy_cyan_input;
+	this.cmy_magenta_input;
+	this.cmy_yellow_input;
 
 	/* [RGB Inputs]*/
-	this.red_input;
-	this.green_input;
-	this.blue_input;
+	this.rgb_red_input;
+	this.rgb_green_input;
+	this.rgb_blue_input;
+	
+	/* [RGB Colour Representation] */
 	this.rgb_raw_color;
 	this.red_input_pc;
 	this.green_input_pc;
@@ -29,23 +37,24 @@ var cmyk = new function() {
 	 */
 
 	this.input_changed = function() {
-		cmyk.cyan_input = $(".cyan-input")[0].value / 100;
-		cmyk.magenta_input = $(".magenta-input")[0].value / 100;
-		cmyk.yellow_input = $(".yellow-input")[0].value / 100;
-		cmyk.black_input = $(".black-input")[0].value / 100;
+		color_obj.cmyk_cyan_input = $(".cmyk-cyan-input")[0].value / 100;
+		color_obj.cmyk_magenta_input = $(".cmyk-magenta-input")[0].value / 100;
+		color_obj.cmyk_yellow_input = $(".cmyk-yellow-input")[0].value / 100;
+		color_obj.cmyk_black_input = $(".cmyk-black-input")[0].value / 100;
 
-		cmyk.cyan_output = $(".cyan-output")[0];
-		cmyk.magenta_output = $(".magenta-output")[0];
-		cmyk.yellow_output = $(".yellow-output")[0];
+		color_obj.cmy_cyan_input = $(".cmy-cyan-input")[0];
+		color_obj.cmy_magenta_input = $(".cmy-magenta-input")[0];
+		color_obj.cmy_yellow_input = $(".cmy-yellow-input")[0];
 
-		cmyk.red_input = $(".red-input")[0];
-		cmyk.green_input = $(".green-input")[0];
-		cmyk.blue_input = $(".blue-input")[0];
-		cmyk.rgb_raw_color = $(".rgb-raw-color")[0];
+		color_obj.rgb_red_input = $(".rgb-red-input")[0];
+		color_obj.rgb_green_input = $(".rgb-green-input")[0];
+		color_obj.rgb_blue_input = $(".rgb-blue-input")[0];
+		
+		color_obj.rgb_raw_color = $(".rgb-raw-color")[0];
 
-		cmyk.red_input_pc = cmyk.red_input.value / 255;
-		cmyk.green_input_pc = cmyk.green_input.value / 255;
-		cmyk.blue_input_pc = cmyk.blue_input.value / 255;
+		color_obj.red_input_pc = color_obj.rgb_red_input.value / 255;
+		color_obj.green_input_pc = color_obj.rgb_green_input.value / 255;
+		color_obj.blue_input_pc = color_obj.rgb_blue_input.value / 255;
 
 		/*
 		X Nt_R = nt_G * 0.4124 * 0.1805 * 0.3576 nt_B 
@@ -88,22 +97,22 @@ var cmyk = new function() {
 		// Y = ( Y * (1 -- K ) K )
 		// M = Min(100, K * (74% + (2 ^ (K / 0.2)) / 100))
 		// Y = Min(100, K * (74% + (2 ^ (K / 0.2)) / 100))
-		cmyk.grey_balance = Math.min(100,Math.round(cmyk.black_input * (0.74 + Math.pow(2, cmyk.black_input / 0.20) / 100) * 100)) / 100;
+		color_obj.grey_balance = Math.min(100,Math.round(color_obj.cmyk_black_input * (0.74 + Math.pow(2, color_obj.cmyk_black_input / 0.20) / 100) * 100)) / 100;
 
-		cmyk.cyan_output.value = Math.round(((cmyk.cyan_input * (1 - cmyk.black_input)) + cmyk.black_input) * 100);
-		cmyk.magenta_output.value = Math.round(((cmyk.magenta_input * (1 - cmyk.grey_balance)) + cmyk.grey_balance) * 100);
-		cmyk.yellow_output.value = Math.round(((cmyk.yellow_input * (1 - cmyk.grey_balance)) + cmyk.grey_balance) * 100);
+		color_obj.cmy_cyan_input.value = Math.round(((color_obj.cmyk_cyan_input * (1 - color_obj.cmyk_black_input)) + color_obj.cmyk_black_input) * 100);
+		color_obj.cmy_magenta_input.value = Math.round(((color_obj.cmyk_magenta_input * (1 - color_obj.grey_balance)) + color_obj.grey_balance) * 100);
+		color_obj.cmy_yellow_input.value = Math.round(((color_obj.cmyk_yellow_input * (1 - color_obj.grey_balance)) + color_obj.grey_balance) * 100);
 
 		/* [Representation of raw inputs] */
-		cmyk.red_input.value = Math.round(255 * (1 - (cmyk.cyan_output.value / 100)));
-		cmyk.green_input.value = Math.round(255 * (1 - (cmyk.magenta_output.value / 100)));
-		cmyk.blue_input.value = Math.round(255 * (1 - (cmyk.yellow_output.value / 100)));
-		// debug_report("background-color: #" + ("0" + parseInt(cmyk.red_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.green_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.blue_input.value, 10).toString(16)).slice(-2));
-		$(cmyk.rgb_raw_color).css("background-color", "#" + ("0" + parseInt(cmyk.red_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.green_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(cmyk.blue_input.value, 10).toString(16)).slice(-2));
+		color_obj.rgb_red_input.value = Math.round(255 * (1 - (color_obj.cmy_cyan_input.value / 100)));
+		color_obj.rgb_green_input.value = Math.round(255 * (1 - (color_obj.cmy_magenta_input.value / 100)));
+		color_obj.rgb_blue_input.value = Math.round(255 * (1 - (color_obj.cmy_yellow_input.value / 100)));
 		
+		// debug_report("background-color: #" + ("0" + parseInt(color_obj.red_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(color_obj.green_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(color_obj.blue_input.value, 10).toString(16)).slice(-2));
+		$(color_obj.rgb_raw_color).css("background-color", "#" + ("0" + parseInt(color_obj.rgb_red_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(color_obj.rgb_green_input.value, 10).toString(16)).slice(-2) + ("0" + parseInt(color_obj.rgb_blue_input.value, 10).toString(16)).slice(-2));
 
+		debug_report(color_obj);
 
-		debug_report(cmyk);
 	}
 
 }

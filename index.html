@@ -1,8 +1,8 @@
 <!DOCTYPE HTML>
 
 <!--
-[Carless App]
-Description: A webapp to assist with a carless life.
+[CMYK Colour]
+Description: An app to convert CMYK colour into an RGB representation that closely approximates print.
 Version: 1.0
 Author: Kevin Montgomery
 -->
@@ -26,14 +26,6 @@ Author: Kevin Montgomery
 <!-- [Keywords and descriptions] -->
 <meta name="keywords" content="cmyk-color">
 <meta name="description" content="An app to convert CMYK colour into an RGB representation that closely approximates print.">
-
-<!-- [Open Graph] -->
-<meta property='og:locale' content='en_CA'/>
-<meta property='og:title' content='Carless 1.0'/>
-<meta property='og:description' content='A webapp to assist with a carless life.'/>
-<meta property='og:url' content=''/>
-<meta property='og:site_name' content='Carless 1.0'/>
-<meta property='og:type' content='article'/>
 
 <title>CMYK Color</title>
 
@@ -94,14 +86,14 @@ Includes:
   </div>
 
   <div class="row">
-  	<div class="large-3 columns cmyk input">
+  	<div class="large-2 columns cmyk input">
   		<p>CMYK Input</p>
 		<div class="row collapse">
 			<div class="large-3 columns">
 				<span class="prefix">Cyan</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="cyan-input" placeholder="Cyan %" onchange="cmyk.input_changed();">
+				<input type="text" class="cmyk-cyan-input" placeholder="Cyan %" onchange="color_obj.input_changed();">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -109,7 +101,7 @@ Includes:
 				<span class="prefix">Magenta</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="magenta-input" placeholder="Magenta %" onchange="cmyk.input_changed();">
+				<input type="text" class="cmyk-magenta-input" placeholder="Magenta %" onchange="color_obj.input_changed();">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -117,7 +109,7 @@ Includes:
 				<span class="prefix">Yellow</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="yellow-input" placeholder="Yellow %" onchange="cmyk.input_changed();">
+				<input type="text" class="cmyk-yellow-input" placeholder="Yellow %" onchange="color_obj.input_changed();">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -125,18 +117,18 @@ Includes:
 				<span class="prefix">Black</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="black-input" placeholder="Black %" onchange="cmyk.input_changed();">
+				<input type="text" class="cmyk-black-input" placeholder="Black %" onchange="color_obj.input_changed();">
 			</div>
 		</div>
   	</div>
-  	<div class="large-3 columns converted cmyk">
+  	<div class="large-2 columns converted cmyk">
   		<p>CMY Output</p>
   		<div class="row collapse">
   			<div class="large-3 columns">
 				<span class="prefix">Cyan</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="cyan-output" placeholder="Cyan %">
+				<input type="text" class="cmy-cyan-input" placeholder="Cyan %">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -144,7 +136,7 @@ Includes:
 				<span class="prefix">Magenta</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="magenta-output" placeholder="Magenta %">
+				<input type="text" class="cmy-magenta-input" placeholder="Magenta %">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -152,18 +144,45 @@ Includes:
 				<span class="prefix">Yellow</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="yellow-output" placeholder="Yellow %">
+				<input type="text" class="cmy-yellow-input" placeholder="Yellow %">
 			</div>
 		</div>
   	</div>
-  	<div class="large-3 columns converted cmyk">
+  	<div class="large-2 columns converted cmyk">
+  		<p>Lab Output</p>
+  		<div class="row collapse">
+  			<div class="large-3 columns">
+				<span class="prefix">L</span>
+			</div>
+			<div class="large-9 columns">
+				<input type="text" class="lab-l-input" placeholder="L %">
+			</div>
+		</div>
+		<div class="row collapse">
+			<div class="large-3 columns">
+				<span class="prefix">a</span>
+			</div>
+			<div class="large-9 columns">
+				<input type="text" class="lab-a-output" placeholder="a">
+			</div>
+		</div>
+		<div class="row collapse">
+			<div class="large-3 columns">
+				<span class="prefix">b</span>
+			</div>
+			<div class="large-9 columns">
+				<input type="text" class="lab-b-output" placeholder="b">
+			</div>
+		</div>
+  	</div>
+  	<div class="large-2 columns converted cmyk">
   		<p>RGB Output</p>
   		<div class="row collapse">
   			<div class="large-3 columns">
 				<span class="prefix">Red</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="red-input" placeholder="Red">
+				<input type="text" class="rgb-red-input" placeholder="Red">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -171,7 +190,7 @@ Includes:
 				<span class="prefix">Green</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="green-input" placeholder="Green">
+				<input type="text" class="rgb-green-input" placeholder="Green">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -179,11 +198,11 @@ Includes:
 				<span class="prefix">Blue</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="blue-input" placeholder="Blue">
+				<input type="text" class="rgb-blue-input" placeholder="Blue">
 			</div>
 		</div>
   	</div>
-  	<div class="large-3 columns converted cmyk">
+  	<div class="large-2 columns converted cmyk end">
   		<p>RGB Raw Color</p>
   		<div class="rgb-raw-color" style="width: 100%; height: 4em; border: 1px solid lightgrey"></div>
   	</div>
@@ -227,6 +246,73 @@ $(function() {
 
 <!-- [Custom JQuery] -->
 <script src="js/my-jquery.js?ver=1.9.1"></script>
+
+<script>
+
+/*
+function getBinary(file){
+    var xhr = new XMLHttpRequest();  
+    xhr.open("GET", file);  
+    xhr.responseType = "file";
+    xhr.overrideMimeType("text/plain; charset=x-user-defined"); 
+    xhr.send(null);
+    console.log(xhr);
+    return xhr.response;
+}
+
+function utf8_to_b64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+
+function b64_to_utf8(str) {
+    return decodeURIComponent(escape(atob(str)));
+}
+
+var binary = getBinary('http://github.local/cmyk-color/profiles/SWOP2013_and_GRACoL2013_ICC_Profiles/SWOP2013C5_ICC_Profile/SWOP2013C5.icc');
+var base64encoded = utf8_to_b64(binary);
+var base64decoded = b64_to_utf8(binary);
+
+console.log(binary);
+*/
+
+
+function utf8_to_b64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+
+function b64_to_utf8(str) {
+    return decodeURIComponent(escape(atob(str)));
+}
+
+var oReq = new XMLHttpRequest();
+oReq.open("GET", "profiles/SWOP2013_and_GRACoL2013_ICC_Profiles/SWOP2013C5_ICC_Profile/SWOP2013C5.icc");
+oReq.responseType = "file";
+oReq.overrideMimeType("text/plain; charset=x-user-defined");
+
+oReq.onload = function (oEvent) {
+  
+  var arrayBuffer = b64_to_utf8(oReq.response); // Note: not oReq.responseText
+  console.log(arrayBuffer);
+  
+  /*
+  if (arrayBuffer) {
+  	// console.log(arrayBuffer);
+    var byteArray = new Uint16Array(arrayBuffer);
+    console.log(byteArray);
+    for (var i = 0; i < byteArray.byteLength; i++) {
+      // do something with each byte in the array
+      // console.log(byteArray[i]);
+    }
+  }
+  */
+
+};
+
+oReq.send(null);
+
+// console.log(oReq);
+
+</script>
 
 <noscript>
 	<style>
