@@ -250,6 +250,46 @@ $(function() {
 <script>
 
 /*
+var buffer = new ArrayBuffer( res.length ), // res is this.response in your case
+    view   = new Uint8Array( buffer ),
+    len    = view.length,
+    fromCharCode = String.fromCharCode,
+    i, s, str;    
+
+
+str = "";
+
+for ( i = len; i--; ) {
+  view[i] = res[i].charCodeAt(0);
+}
+
+for ( i = 0; i < len; ++i ) {
+  str += fromCharCode( view[i] );
+}
+
+str = "";
+
+for ( i = 0; i < len; ++i ) {
+  str += fromCharCode( res[i].charCodeAt(0) & 0xff );
+}
+*/
+
+function load_binary_resource(url) {
+  var byteArray = [];
+  var req = new XMLHttpRequest();
+  req.open('GET', url, false);
+  req.overrideMimeType('text\/plain; charset=x-user-defined');
+  req.send(null);
+  if (req.status != 200) return byteArray;
+  for (var i = 0; i < req.responseText.length; ++i) {
+    byteArray.push(req.responseText.charCodeAt(0) & 0xff)
+  }
+  return byteArray;
+}
+
+// console.log(load_binary_resource('profiles/SWOP2013_and_GRACoL2013_ICC_Profiles/SWOP2013C5_ICC_Profile/SWOP2013C5.icc'));
+
+/*
 function getBinary(file){
     var xhr = new XMLHttpRequest();  
     xhr.open("GET", file);  
@@ -273,8 +313,6 @@ var base64encoded = utf8_to_b64(binary);
 var base64decoded = b64_to_utf8(binary);
 
 console.log(binary);
-*/
-
 
 function utf8_to_b64(str) {
     return btoa(unescape(encodeURIComponent(str)));
@@ -304,11 +342,11 @@ oReq.onload = function (oEvent) {
       // console.log(byteArray[i]);
     }
   }
-  */
 
 };
 
 oReq.send(null);
+*/
 
 // console.log(oReq);
 
