@@ -1618,6 +1618,26 @@ $cmyk_lab_matrix[0][100][100][10] = "43.71,58.84,41.44";
 $cmyk_lab_matrix[100][0][100][10] = "47.4,-55.6,25.36";
 $cmyk_lab_matrix[100][100][0][10] = "25.13,15.86,-37.35";
 
-echo json_encode($cmyk_lab_matrix);
+ksort($cmyk_lab_matrix);
+foreach ($cmyk_lab_matrix as $cyan => $myk):
+	ksort($myk);
+	foreach ($myk as $magenta => $yk):
+		ksort($yk);
+		foreach ($yk as $yellow => $k):
+			ksort($k);
+			foreach ($k as $black => $lab):
+				$cmyk_lab_matrix_sorted[$cyan][$magenta][$yellow][$black] = $lab;
+			endforeach;
+		endforeach;
+	endforeach;
+endforeach;
+
+/*
+echo "<pre>";
+print_r($cmyk_lab_matrix_sorted);
+echo "</pre>";
+*/
+
+echo json_encode($cmyk_lab_matrix_sorted);
 
 ?>
