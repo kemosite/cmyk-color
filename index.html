@@ -86,12 +86,6 @@ Includes:
   </div>
 
   <div class="row">
-  	<div class="small-12 columns">
-  		<h3>CMYK</h3>
-  	</div>
-  </div>
-
-  <div class="row">
   	<div class="large-2 columns cmyk input">
   		<p>CMYK Input</p>
 		<div class="row collapse">
@@ -158,8 +152,8 @@ Includes:
   	</div>
   -->
   
-  	<div class="large-2 columns converted cmyk">
-  		<p>Lab Output</p>
+  	<div class="large-2 columns lab input">
+  		<p>Lab Input</p>
   		<div class="row collapse">
   			<div class="large-3 columns">
 				<span class="prefix">L</span>
@@ -173,7 +167,7 @@ Includes:
 				<span class="prefix">a</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="lab-a-output" placeholder="a">
+				<input type="text" class="lab-a-input" placeholder="a">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -181,18 +175,19 @@ Includes:
 				<span class="prefix">b</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="lab-b-output" placeholder="b">
+				<input type="text" class="lab-b-input" placeholder="b">
 			</div>
 		</div>
   	</div>
-  	<div class="large-2 columns converted cmyk">
-  		<p>RGB Output</p>
+
+  	<div class="large-2 columns rgb input">
+  		<p>RGB Input</p>
   		<div class="row collapse">
   			<div class="large-3 columns">
 				<span class="prefix">Red</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="rgb-red-input" placeholder="Red">
+				<input type="text" class="rgb-r-input" placeholder="Red">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -200,7 +195,7 @@ Includes:
 				<span class="prefix">Green</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="rgb-green-input" placeholder="Green">
+				<input type="text" class="rgb-g-input" placeholder="Green">
 			</div>
 		</div>
 		<div class="row collapse">
@@ -208,13 +203,13 @@ Includes:
 				<span class="prefix">Blue</span>
 			</div>
 			<div class="large-9 columns">
-				<input type="text" class="rgb-blue-input" placeholder="Blue">
+				<input type="text" class="rgb-b-input" placeholder="Blue">
 			</div>
 		</div>
   	</div>
-  	<div class="large-2 columns converted cmyk end">
+  	<div class="large-2 columns rgb display end">
   		<p>RGB Raw Color</p>
-  		<div class="rgb-raw-color" style="width: 100%; height: 4em; border: 1px solid lightgrey"></div>
+  		<div class="rgb-display-color" style="width: 100%; height: 4em; border: 1px solid lightgrey"></div>
   	</div>
   </div>
 

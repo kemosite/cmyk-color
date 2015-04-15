@@ -1,4 +1,4 @@
-// Add size count to the Object prototype
+// Define function to count object size
 Object.size = function(obj) {
     var size = 0, key;
     for (key in obj) {
@@ -11,34 +11,42 @@ Object.size = function(obj) {
 var color_obj = new function() {
 
 	/* [CMYK Inputs]*/
-	this.cmyk_cyan_input;
-	this.cmyk_magenta_input;
-	this.cmyk_yellow_input;
-	this.cmyk_black_input;
+	this.cmyk_input = {
+		"c": "",
+		"m": "",
+		"y": "",
+		"k": ""
+	}
 
 	/* [Lab Inputs] */
-	this.lab_l_input;
-	this.lab_a_input;
-	this.lab_b_input;
+	this.lab_input = {
+		"l": "",
+		"a": "",
+		"b": ""
+	}
 
 	/* [Grey Balance] */
-	this.grey_balance;
-
-	/* [CMY Inputs]*/
-	// this.cmy_cyan_input;
-	// this.cmy_magenta_input;
-	// this.cmy_yellow_input;
+	// this.grey_balance;
 
 	/* [RGB Inputs]*/
-	this.rgb_red_input;
-	this.rgb_green_input;
-	this.rgb_blue_input;
+	this.rgb_input = {
+		"r": "",
+		"g": "",
+		"b": ""
+	}
+
+	/* [XYZ Space] */
+	this.xyz_space = {
+		"x": "",
+		"y": "",
+		"z": ""
+	}
 	
 	/* [RGB Colour Representation] */
-	this.rgb_raw_color;
-	this.red_input_pc;
-	this.green_input_pc;
-	this.blue_input_pc;
+	// this.rgb_raw_color;
+	// this.red_input_pc;
+	// this.green_input_pc;
+	// this.blue_input_pc;
 
 	/* [CMYK Lab Matrix] */
 	this.cmyk_lab_matrix = {
@@ -2430,7 +2438,7 @@ var color_obj = new function() {
 		var yellow_pick = 0;
 		var black_pick = 0;
 
-		// Guess what the Lab value is
+		// Define white Lab value from profile matrix
 		var white = color_obj.cmyk_lab_matrix[0][0][0][0].split(",");
 		var white_lab = {
 			"l" : white[0],
@@ -2438,42 +2446,37 @@ var color_obj = new function() {
 			"b" : white[2]
 		};
 
-		// Might be needed to estimation
-		var c100 = color_obj.cmyk_lab_matrix[100][0][0][0].split(",");
-		var c100_lab = {
-			"l" : c100[0],
-			"a" : c100[1],
-			"b" : c100[2]
-		};
-		var c_lab_ratios = {
-			"l" : (white_lab.l - c100_lab.l) / 100,
-			"a" : (white_lab.a - c100_lab.a) / 100,
-			"b" : (white_lab.b - c100_lab.b) / 100
-		}
-		debug_report("C Lab Ratios:");
-		debug_report(c_lab_ratios);
-
+		// Define a base Cyan pick, even if nothing is input.
 		var c_pick_lab = {
 			"l" : white_lab.l,
 			"a" : white_lab.a,
 			"b" : white_lab.b
 		};
 
-		var ci = 0;
+		/*
+		The problem with there not being (apparently) a straightforward formula for determining Lab values from CMYK
+		is that determinining the correct curve/dot gain is an interative process.
+
+		Each entry in the specification matrix needs to be evaluated up to the level input by the user.
+
+		Also, if additional values are specified in other channels, the tool needs to be able to keep evaluating the matrix for entries that sometimes aren't available.
+
+		*/
+
 		for (cyan_matrix in color_obj.cmyk_lab_matrix) {
 
 			var cyan_matrix = parseInt(cyan_matrix);
+			var lowest_c = (lowest_c) ? lowest_c : cyan_matrix;
 
 			if (Object.size(color_obj.cmyk_lab_matrix[cyan_matrix]) > 1) {
 
-				var lowest_c = (lowest_c) ? lowest_c : cyan_matrix;
-
-				if (cyan_matrix <= cyan) {
-					cyan_pick = cyan_matrix;					
+				if ((magenta > 0 || yellow > 0 || black > 0) && cyan_matrix <= cyan) {
+					cyan_pick = cyan_matrix;
 				}
-			}
 
-			ci++;
+			} if (cyan_matrix <= cyan) {
+				cyan_pick = cyan_matrix;
+			}
 
 		}
 
@@ -2489,27 +2492,37 @@ var color_obj = new function() {
 		}
 
 		// Apply guess based on value selected in cyan matrix
+		// Goal is to apply curve/dot gain apparent in the specification matrix
+		// Guesses need to carry forward in case exact numbers are not specified in matrix.
+
 		c_l_ratio = (cyan_pick == 0) ? (white_lab.l - c_pick_lab.l) / 1 : (white_lab.l - c_pick_lab.l) / cyan_pick;
-		var c_lab_guess =  (cyan > 0) ? white_lab.l - (c_l_ratio * cyan) : white_lab.l;
+		c_a_ratio = (cyan_pick == 0) ? (white_lab.a - c_pick_lab.a) / 1 : (white_lab.a - c_pick_lab.a) / cyan_pick;
+		c_b_ratio = (cyan_pick == 0) ? (white_lab.b - c_pick_lab.b) / 1 : (white_lab.b - c_pick_lab.b) / cyan_pick;
+
+		var c_l_guess =  (cyan > 0) ? white_lab.l - (c_l_ratio * cyan) : white_lab.l;
+		var c_a_guess =  (cyan > 0) ? white_lab.a - (c_a_ratio * cyan) : white_lab.a;
+		var c_b_guess =  (cyan > 0) ? white_lab.b - (c_b_ratio * cyan) : white_lab.b;
+
 		var cm_pick_lab = {
-			"l" : c_lab_guess
+			"l" : c_l_guess,
+			"a" : c_a_guess,
+			"b" : c_b_guess
 		};
 
-		var mi = 0;
 		for (magenta_matrix in color_obj.cmyk_lab_matrix[cyan_pick]) {
 
 			var magenta_matrix = parseInt(magenta_matrix);
+			var lowest_m = (lowest_m) ? lowest_m : magenta_matrix;
 
 			if (Object.size(color_obj.cmyk_lab_matrix[cyan_pick][magenta_matrix]) > 1) {
 
-				var lowest_m = (lowest_m) ? lowest_m : magenta_matrix;
-
-				if (magenta_matrix <= magenta) {
+				if ((yellow > 0 || black > 0) && magenta_matrix <= magenta) {
 					magenta_pick = magenta_matrix;
 				}
-			}
 
-			mi++;
+			} if (magenta_matrix <= magenta) {
+				magenta_pick = magenta_matrix;
+			}
 
 		}
 
@@ -2524,25 +2537,28 @@ var color_obj = new function() {
 			"b" : magenta_pick_array[2]
 		}
 
-		// Apply guess based on value selected in cyan matrix
-		var cm_l_ratio = (magenta_pick == 0) ? (c_lab_guess - cm_pick_lab.l) / 1 : (c_lab_guess - cm_pick_lab.l) / magenta_pick;
-		var cm_lab_guess = (magenta > 0) ? c_lab_guess - (cm_l_ratio * magenta) : c_lab_guess;
+		var cm_l_ratio = (magenta_pick == 0) ? (c_l_guess - cm_pick_lab.l) / 1 : (c_l_guess - cm_pick_lab.l) / magenta_pick;
+		var cm_a_ratio = (magenta_pick == 0) ? (c_a_guess - cm_pick_lab.a) / 1 : (c_a_guess - cm_pick_lab.a) / magenta_pick;
+		var cm_b_ratio = (magenta_pick == 0) ? (c_b_guess - cm_pick_lab.b) / 1 : (c_b_guess - cm_pick_lab.b) / magenta_pick;
+
+		var cm_l_guess = (magenta > 0) ? c_l_guess - (cm_l_ratio * magenta) : c_l_guess;
+		var cm_a_guess = (magenta > 0) ? c_a_guess - (cm_a_ratio * magenta) : c_a_guess;
+		var cm_b_guess = (magenta > 0) ? c_b_guess - (cm_b_ratio * magenta) : c_b_guess;
 		
-		var yi = 0;
 		for (yellow_matrix in color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick]) {
 
 			var yellow_matrix = parseInt(yellow_matrix);
+			var lowest_y = (lowest_y) ? lowest_y : yellow_matrix;
 
 			if (Object.size(color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick][yellow_matrix]) > 1) {
 
-				var lowest_y = (lowest_y) ? lowest_y : yellow_matrix;
-
-				if (yellow_matrix <= yellow) {
+				if (black > 0 && yellow_matrix <= yellow) {
 					yellow_pick = yellow_matrix;
 				}
-			}
 
-			yi++;	
+			} if (yellow_matrix <= yellow) {
+				yellow_pick = yellow_matrix;
+			}
 		
 		}
 
@@ -2551,31 +2567,29 @@ var color_obj = new function() {
 		}
 
 		var yellow_pick_array = color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick][yellow_pick][0].split(",");
+
 		cmy_pick_lab = {
 			"l" : yellow_pick_array[0],
 			"a" : yellow_pick_array[1],
 			"b" : yellow_pick_array[2]
 		}
 
-		// Apply guess based on value selected in yellow matrix
-		var cmy_l_ratio = (yellow_pick == 0) ? (cm_lab_guess - cmy_pick_lab.l) / 1 : (cm_lab_guess - cmy_pick_lab.l) / yellow_pick;
-		var cmy_lab_guess = (yellow > 0) ? cm_lab_guess - (cmy_l_ratio * yellow) : cm_lab_guess;
+		var cmy_l_ratio = (yellow_pick == 0) ? (cm_l_guess - cmy_pick_lab.l) / 1 : (cm_l_guess - cmy_pick_lab.l) / yellow_pick;
+		var cmy_a_ratio = (yellow_pick == 0) ? (cm_a_guess - cmy_pick_lab.a) / 1 : (cm_a_guess - cmy_pick_lab.a) / yellow_pick;
+		var cmy_b_ratio = (yellow_pick == 0) ? (cm_b_guess - cmy_pick_lab.b) / 1 : (cm_b_guess - cmy_pick_lab.b) / yellow_pick;
 
-		var ki = 0;
+		var cmy_l_guess = (yellow > 0) ? cm_l_guess - (cmy_l_ratio * yellow) : cm_l_guess;
+		var cmy_a_guess = (yellow > 0) ? cm_a_guess - (cmy_a_ratio * yellow) : cm_a_guess;
+		var cmy_b_guess = (yellow > 0) ? cm_b_guess - (cmy_b_ratio * yellow) : cm_b_guess;
+
 		for (black_matrix in color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick][yellow_pick]) {
 
 			var black_matrix = parseInt(black_matrix);
+			var lowest_k = (lowest_k) ? lowest_k : black_matrix;
 
-			if (Object.size(color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick][yellow_pick][black_matrix]) > 1) {
-
-				var lowest_k = (lowest_k) ? lowest_k : black_matrix;
-
-				if (black_matrix <= black) {
-					black_pick = black_matrix;
-				}
+			if (black_matrix <= black) {
+				black_pick = black_matrix;
 			}
-
-			ki++;
 			
 		}
 
@@ -2591,38 +2605,157 @@ var color_obj = new function() {
 		}
 
 		// Apply guess based on value selected in yellow matrix
-		var cmyk_l_ratio = (black_pick == 0) ? (cmy_lab_guess - cmyk_pick_lab.l) / 1 : (cmy_lab_guess - cmyk_pick_lab.l) / black_pick;
-		var cmyk_lab_guess = (black > 0) ? cmy_lab_guess - (cmyk_l_ratio * black) : cmy_lab_guess;
+		var cmyk_l_ratio = (black_pick == 0) ? (cmy_l_guess - cmyk_pick_lab.l) / 1 : (cmy_l_guess - cmyk_pick_lab.l) / black_pick;
+		var cmyk_a_ratio = (black_pick == 0) ? (cmy_a_guess - cmyk_pick_lab.a) / 1 : (cmy_a_guess - cmyk_pick_lab.a) / black_pick;
+		var cmyk_b_ratio = (black_pick == 0) ? (cmy_b_guess - cmyk_pick_lab.b) / 1 : (cmy_b_guess - cmyk_pick_lab.b) / black_pick;
+		
+		/*
+		var cmyk_l_guess = (black > 0) ? cmy_l_guess - (cmyk_l_ratio * black) : cmy_l_guess;
+		var cmyk_a_guess = (black > 0) ? cmy_a_guess - (cmyk_a_ratio * black) : cmy_a_guess;
+		var cmyk_b_guess = (black > 0) ? cmy_b_guess - (cmyk_b_ratio * black) : cmy_b_guess;
+		*/
 
-		debug_report("Cyan Picks:");
-		debug_report(color_obj.cmyk_lab_matrix);
-		debug_report("Magenta Picks:");
-		debug_report(color_obj.cmyk_lab_matrix[cyan_pick]);
-		debug_report("Yellow Picks:");
-		debug_report(color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick]);
-		debug_report("Black Picks:");
-		debug_report(color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick][yellow_pick]);
+		color_obj.lab_input.l = Math.round(((black > 0) ? cmy_l_guess - (cmyk_l_ratio * black) : cmy_l_guess) * 100) / 100;
+		color_obj.lab_input.a = Math.round(((black > 0) ? cmy_a_guess - (cmyk_a_ratio * black) : cmy_a_guess) * 100) / 100;
+		color_obj.lab_input.b = Math.round(((black > 0) ? cmy_b_guess - (cmyk_b_ratio * black) : cmy_b_guess) * 100) / 100;
 
+		/*
 		debug_report("[MATRIX MATCH]");
 		debug_report("Cyan: " + cyan_pick + ", Magenta: " + magenta_pick + ", Yellow: " + yellow_pick + ", Black: " + black_pick);
 		debug_report(color_obj.cmyk_lab_matrix[cyan_pick][magenta_pick][yellow_pick][black_pick]);
+		
 		debug_report("[ADJUSTED]");
-		debug_report("C Lab guess: " + c_lab_guess);
-		debug_report("CM Lab guess: " + cm_lab_guess);
-		debug_report("CMY Lab guess: " + cmy_lab_guess);
-		debug_report("CMYK Lab guess: " + cmyk_lab_guess);
+		debug_report("Cyan: " + cyan + ", Magenta: " + magenta + ", Yellow: " + yellow + ", Black: " + black);
+		debug_report(color_obj.lab_input);
+		*/
+
+	}
+
+	this.lab2xyz = function(l = 0, a = 0, b = 0) {
+
+		// debug_report (l + ", " + a + ", " + b);
+
+		var y = (l + 16) / 116;
+		var x = a / 500 + y;
+		var z = y - b / 200;
+
+		debug_report (x + ", " + y + ", " + z);
+
+		// Something is messed up here...
+
+		if (x ^ 3 > 0.008856) { 
+			x = x ^ 3;
+		} else {
+			x = (x - 16 / 116) / 7.787;
+		}
+
+		if (3 ^ y > 0.008856) { 
+			debug_report(y);
+			y = 3 ^ y; 
+			debug_report(y);
+		} else { 
+			y = (y - 16 / 116) / 7.787;
+		}
+
+		if (z ^ 3 > 0.008856) {
+			z = z ^ 3;
+		} else {
+			z = (z - 16 / 116) / 7.787;
+		}
+
+		color_obj.xyz_space.x = 0.95047 * x;     //ref_X =  95.047     Observer= 2°, Illuminant= D65
+		color_obj.xyz_space.y = 1 * y;     //ref_Y = 100.000
+		color_obj.xyz_space.z = 1.08883 * z;     //ref_Z = 108.883
+
+		/* D65	0.95047	1.00000	1.08883 */
+
+		debug_report (x + ", " + y + ", " + z);
+
+	}
+
+	this.xyz2rgb = function(x = 0, y = 0, z = 0) {
+
+		/*
+		sRGB	D65	0.4124564  0.3575761  0.1804375	3.2404542 -1.5371385 -0.4985314
+					0.2126729  0.7151522  0.0721750	-0.9692660  1.8760108  0.0415560
+					0.0193339  0.1191920  0.9503041	0.0556434 -0.2040259  1.0572252
+		*/
+
+		/*
+		var_X = X / 100        //X from 0 to  95.047      (Observer = 2°, Illuminant = D65)
+		var_Y = Y / 100        //Y from 0 to 100.000
+		var_Z = Z / 100        //Z from 0 to 108.883
+
+		var_R = var_X *  3.2406 + var_Y * -1.5372 + var_Z * -0.4986
+		var_G = var_X * -0.9689 + var_Y *  1.8758 + var_Z *  0.0415
+		var_B = var_X *  0.0557 + var_Y * -0.2040 + var_Z *  1.0570
+
+		if ( var_R > 0.0031308 ) var_R = 1.055 * ( var_R ^ ( 1 / 2.4 ) ) - 0.055
+		else                     var_R = 12.92 * var_R
+		if ( var_G > 0.0031308 ) var_G = 1.055 * ( var_G ^ ( 1 / 2.4 ) ) - 0.055
+		else                     var_G = 12.92 * var_G
+		if ( var_B > 0.0031308 ) var_B = 1.055 * ( var_B ^ ( 1 / 2.4 ) ) - 0.055
+		else                     var_B = 12.92 * var_B
+
+		R = var_R * 255
+		G = var_G * 255
+		B = var_B * 255
+		*/
+
+		x = x / 100;
+		y = y / 100;
+		z = z / 100;
+
+		var r = (x *  3.2406) + (y * -1.5372) + (z * -0.4986);
+		var g = (x * -0.9689) + (y *  1.8758) + (z *  0.0415);
+		var b = (x *  0.0557) + (y * -0.2040) + (z *  1.0570);
+
+		debug_report (r + ", " + g + ", " + b);
+
+		if (r > 0.0031308) {
+			r = 1.055 * (r ^ (1 / 2.4)) - 0.055;
+		} else {
+			r = 12.92 * r;
+		}
+
+		if (g > 0.0031308 ) {
+			g = 1.055 * (g ^ (1 / 2.4)) - 0.055;
+		} else {
+			g = 12.92 * g;
+		}
+		
+		if (b > 0.0031308 ) {
+			b = 1.055 * (b ^ (1 / 2.4)) - 0.055;
+		} else {
+			b = 12.92 * b;
+		}
+
+		debug_report (r + ", " + g + ", " + b);
+
+		color_obj.rgb_input.r = r * 255;
+		color_obj.rgb_input.g = g * 255;
+		color_obj.rgb_input.b = b * 255;
+
+		debug_report(color_obj.rgb_input);
 
 	}
 
 	this.input_changed = function() {
 		
 		// Get CMYK Inputs
-		color_obj.cmyk_cyan_input = $(".cmyk-cyan-input")[0].value;
-		color_obj.cmyk_magenta_input = $(".cmyk-magenta-input")[0].value;
-		color_obj.cmyk_yellow_input = $(".cmyk-yellow-input")[0].value;
-		color_obj.cmyk_black_input = $(".cmyk-black-input")[0].value;
+		color_obj.cmyk_input.c = $(".cmyk-cyan-input")[0].value;
+		color_obj.cmyk_input.m = $(".cmyk-magenta-input")[0].value;
+		color_obj.cmyk_input.y = $(".cmyk-yellow-input")[0].value;
+		color_obj.cmyk_input.k = $(".cmyk-black-input")[0].value;
 
-		color_obj.cmyk2lab(color_obj.cmyk_cyan_input, color_obj.cmyk_magenta_input, color_obj.cmyk_yellow_input, color_obj.cmyk_black_input);
+		color_obj.cmyk2lab(color_obj.cmyk_input.c, color_obj.cmyk_input.m, color_obj.cmyk_input.y, color_obj.cmyk_input.k);
+
+		$(".lab-l-input")[0].value = color_obj.lab_input.l;
+		$(".lab-a-input")[0].value = color_obj.lab_input.a;
+		$(".lab-b-input")[0].value = color_obj.lab_input.b;
+
+		color_obj.lab2xyz(color_obj.lab_input.l, color_obj.lab_input.a, color_obj.lab_input.b);
+		color_obj.xyz2rgb(color_obj.xyz_space.x, color_obj.xyz_space.y, color_obj.xyz_space.z);
 
 		// color_obj.cmy_cyan_input = $(".cmy-cyan-input")[0];
 		// color_obj.cmy_magenta_input = $(".cmy-magenta-input")[0];
@@ -2637,23 +2770,6 @@ var color_obj = new function() {
 		// color_obj.red_input_pc = color_obj.rgb_red_input.value / 255;
 		// color_obj.green_input_pc = color_obj.rgb_green_input.value / 255;
 		// color_obj.blue_input_pc = color_obj.rgb_blue_input.value / 255;
-
-		/*
-		X Nt_R = nt_G * 0.4124 * 0.1805 * 0.3576 nt_B 
-		Y Nt_R = nt_G * 0.2126 * 0.0722 * 0.7152 nt_B 
-		Z Nt_R = nt_G * 0.0193 * 0.9505 * 0.1192 nt_B
-		*/
-
-		/* [sRGB XYZ] */
-		// X = 0.9642, Y = 1, Z = 0.82491
-
-		/* [Bradford Matrix] */
-		/*
-		0.8951000  0.2664000 -0.1614000
-		-0.7502000  1.7135000  0.0367000
-		 0.0389000 -0.0685000  1.0296000
-		 */
-
 
 		// debug_report(cmyk.rgb_raw_color);
 
