@@ -43,7 +43,7 @@ var color_obj = new function() {
 	}
 	
 	/* [RGB Colour Representation] */
-	// this.rgb_raw_color;
+	this.rgb_color_display;
 	// this.red_input_pc;
 	// this.green_input_pc;
 	// this.blue_input_pc;
@@ -2639,28 +2639,24 @@ var color_obj = new function() {
 		var x = a / 500 + y;
 		var z = y - b / 200;
 
-		debug_report (x + ", " + y + ", " + z);
-
 		// Something is messed up here...
 
-		if (x ^ 3 > 0.008856) { 
-			x = x ^ 3;
+		if (Math.pow(x,3) > 0.008856) { 
+			x = Math.pow(x,3);
 		} else {
-			x = (x - 16 / 116) / 7.787;
+			x = (116 * x - 16) / 903.3;
 		}
 
-		if (3 ^ y > 0.008856) { 
-			debug_report(y);
-			y = 3 ^ y; 
-			debug_report(y);
+		if (l > 903.3 * 0.008856) { 
+			y = Math.pow((l + 16) / 116,3); 
 		} else { 
-			y = (y - 16 / 116) / 7.787;
+			y = l / 903.3;
 		}
 
-		if (z ^ 3 > 0.008856) {
-			z = z ^ 3;
+		if (Math.pow(z,3) > 0.008856) {
+			z = Math.pow(z,3);
 		} else {
-			z = (z - 16 / 116) / 7.787;
+			z = (116 * z - 16) / 903.3;
 		}
 
 		color_obj.xyz_space.x = 0.95047 * x;     //ref_X =  95.047     Observer= 2°, Illuminant= D65
@@ -2669,7 +2665,7 @@ var color_obj = new function() {
 
 		/* D65	0.95047	1.00000	1.08883 */
 
-		debug_report (x + ", " + y + ", " + z);
+		// debug_report (color_obj.xyz_space);
 
 	}
 
@@ -2702,39 +2698,53 @@ var color_obj = new function() {
 		B = var_B * 255
 		*/
 
+		/*
 		x = x / 100;
 		y = y / 100;
 		z = z / 100;
+		*/
 
-		var r = (x *  3.2406) + (y * -1.5372) + (z * -0.4986);
-		var g = (x * -0.9689) + (y *  1.8758) + (z *  0.0415);
-		var b = (x *  0.0557) + (y * -0.2040) + (z *  1.0570);
+		/*
+		var r = x *  3.2406 + y * -1.5372 + z * -0.4986;
+		var g = x * -0.9689 + y *  1.8758 + z *  0.0415;
+		var b = x *  0.0557 + y * -0.2040 + z *  1.0570;
+		*/
 
-		debug_report (r + ", " + g + ", " + b);
+		/*
+		[ R ]   [  3.240479 -1.537150 -0.498535 ]   [ X ]
+		[ G ] = [ -0.969256  1.875992  0.041556 ] * [ Y ]
+		[ B ]   [  0.055648 -0.204043  1.057311 ]   [ Z ]
+		*/
+
+		var r = 3.2406 * x + -1.5372 * y + -0.4986 * z;
+		var g = -0.9689 * x + 1.8758 * y + 0.0415 * z;
+		var b = 0.0557 * x + -0.2040 * y + 1.0570 * z;
+
+		// debug_report (r + ", " + g + ", " + b);
 
 		if (r > 0.0031308) {
-			r = 1.055 * (r ^ (1 / 2.4)) - 0.055;
+			r = Math.pow(1.055 * r,(1 / 2.4)) - 0.055;
 		} else {
 			r = 12.92 * r;
 		}
 
 		if (g > 0.0031308 ) {
-			g = 1.055 * (g ^ (1 / 2.4)) - 0.055;
+			g = Math.pow(1.055 * g,(1 / 2.4)) - 0.055;
 		} else {
 			g = 12.92 * g;
 		}
 		
 		if (b > 0.0031308 ) {
-			b = 1.055 * (b ^ (1 / 2.4)) - 0.055;
+			b = Math.pow(1.055 * b,(1 / 2.4)) - 0.055;
 		} else {
 			b = 12.92 * b;
 		}
 
-		debug_report (r + ", " + g + ", " + b);
+		// debug_report (r + ", " + g + ", " + b);
 
-		color_obj.rgb_input.r = r * 255;
-		color_obj.rgb_input.g = g * 255;
-		color_obj.rgb_input.b = b * 255;
+		color_obj.rgb_input.r = Math.max(0, Math.round(r * 255));
+		color_obj.rgb_input.g = Math.max(0, Math.round(g * 255));
+		color_obj.rgb_input.b = Math.max(0, Math.round(b * 255));
 
 		debug_report(color_obj.rgb_input);
 
@@ -2756,6 +2766,13 @@ var color_obj = new function() {
 
 		color_obj.lab2xyz(color_obj.lab_input.l, color_obj.lab_input.a, color_obj.lab_input.b);
 		color_obj.xyz2rgb(color_obj.xyz_space.x, color_obj.xyz_space.y, color_obj.xyz_space.z);
+
+		$(".rgb-r-input")[0].value = color_obj.rgb_input.r;
+		$(".rgb-g-input")[0].value = color_obj.rgb_input.g;
+		$(".rgb-b-input")[0].value = color_obj.rgb_input.b;
+
+		color_obj.rgb_color_display = $(".rgb-display-color")[0];
+		$(color_obj.rgb_color_display).css("background-color", "#" + ("0" + parseInt(color_obj.rgb_input.r, 10).toString(16)).slice(-2) + ("0" + parseInt(color_obj.rgb_input.g, 10).toString(16)).slice(-2) + ("0" + parseInt(color_obj.rgb_input.b, 10).toString(16)).slice(-2));
 
 		// color_obj.cmy_cyan_input = $(".cmy-cyan-input")[0];
 		// color_obj.cmy_magenta_input = $(".cmy-magenta-input")[0];
